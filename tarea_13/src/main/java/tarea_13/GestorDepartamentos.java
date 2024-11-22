@@ -1,49 +1,50 @@
 package tarea_13;
 
 import java.sql.*;
+import java.util.Scanner;
 
-/**
- * Esta clase gestiona las operaciones relacionadas con la tabla Departamento.
- * Permite insertar nuevos departamentos y mostrar los existentes en la base de datos.
- */
 public class GestorDepartamentos {
 
-    // Ruta fija de la base de datos
-    private static final String URL_DB = "jdbc:sqlite:tarea_13.db";
+	private static Scanner sc = new Scanner(System.in);
 
-    /**
-     * Método para insertar un nuevo departamento en la base de datos.
-     * 
-     * @param dnombre   El nombre del departamento.
-     * @param localidad La localidad del departamento.
-     */
-    public static void insertarDepartamento(String dnombre, String localidad) {
-        String sql = "INSERT INTO Departamento (dnombre, localidad) VALUES (?, ?)";
-        try (Connection conn = ConexionBD_SQLite.conectar(URL_DB); 
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, dnombre);
-            pstmt.setString(2, localidad);
-            pstmt.executeUpdate();
-            System.out.println("Departamento insertado con éxito.");
-        } catch (SQLException e) {
-            System.out.println("Error al insertar departamento: " + e.getMessage());
-        }
-    }
+	public void insertarDepartamento(Connection conexion) {
 
-    /**
-     * Método para mostrar todos los departamentos existentes en la base de datos.
-     */
-    public static void mostrarDepartamentos() {
-        String sql = "SELECT * FROM Departamento";
-        try (Connection conn = ConexionBD_SQLite.conectar(URL_DB); 
-             Statement stmt = conn.createStatement(); 
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                System.out.println("Dept No: " + rs.getInt("dept_no") + ", Nombre: " + rs.getString("dnombre")
-                        + ", Localidad: " + rs.getString("localidad"));
-            }
-        } catch (SQLException e) {
-            System.out.println("Error al mostrar departamentos: " + e.getMessage());
-        }
-    }
+		System.out.print("Nombre del Departamento: ");
+		String nombreDepartamento = sc.nextLine();
+		System.out.print("Localidad: ");
+		String localidad = sc.nextLine();
+
+		String sql = "INSERT INTO Departamento (dnombre, localidad) VALUES (?, ?)";
+
+		try {
+
+			PreparedStatement sentencia = conexion.prepareStatement(sql);
+
+			sentencia.setString(1, nombreDepartamento);
+			sentencia.setString(2, localidad);
+			sentencia.executeUpdate();
+			System.out.println("Departamento insertado con éxito.");
+		} catch (SQLException e) {
+			System.out.println("Error al insertar departamento: " + e.getMessage());
+		}
+	}
+
+	public void mostrarDepartamentos(Connection conexion) {
+
+		String sql = "SELECT * FROM Departamento";
+
+		try {
+
+			Statement sentencia = conexion.createStatement();
+			ResultSet resultado = sentencia.executeQuery(sql);
+
+			while (resultado.next()) {
+
+				System.out.println("Departamento Nº: " + resultado.getInt("dept_no") + ", Nombre: "
+						+ resultado.getString("dnombre") + ", Localidad: " + resultado.getString("localidad"));
+			}
+		} catch (SQLException e) {
+			System.out.println("Error al mostrar departamentos: " + e.getMessage());
+		}
+	}
 }

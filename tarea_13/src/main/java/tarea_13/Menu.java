@@ -1,73 +1,87 @@
 package tarea_13;
 
+import java.sql.Connection;
 import java.util.Scanner;
 
-/**
- * Clase que maneja el menú interactivo de la aplicación.
- */
 public class Menu {
 
-    public static void mostrarMenu() {
-        Scanner sc = new Scanner(System.in);
-        int opcion;
+	private static final Scanner sc = new Scanner(System.in);
 
-        // Crear tablas al inicio
-        //GestorBD_SQLite.crearTablas();
+	ConexionBD_SQLite conexionBDSQLite = new ConexionBD_SQLite();
+	GestorDepartamentos gestorDepartamentos = new GestorDepartamentos();
+	GestorEmpleados gestorEmpleados = new GestorEmpleados();
 
-        do {
-            System.out.println("\nMenú:");
-            System.out.println("1. Insertar Departamento");
-            System.out.println("2. Insertar Empleado");
-            System.out.println("3. Mostrar Departamentos");
-            System.out.println("4. Mostrar Empleados");
-            System.out.println("5. Salir");
-            System.out.print("Seleccione una opción: ");
-            opcion = sc.nextInt();
-            sc.nextLine(); // Consumir el salto de línea
+	public void mostrarMenu() {
 
-            switch (opcion) {
-                case 1:
-                    System.out.print("Nombre del Departamento: ");
-                    String dnombre = sc.nextLine();
-                    System.out.print("Localidad: ");
-                    String localidad = sc.nextLine();
-                    GestorBD_SQLite.insertarDepartamento(dnombre, localidad);
-                    break;
+		// Establecer conexión a la base de datos
+		Connection conexion = conexionBDSQLite.obtenerConexion();
+		if (conexion == null) {
+			System.out.println("No se pudo conectar a la base de datos. Cerrando la aplicación.");
+			return;
+		}
 
-                case 2:
-                    System.out.print("Apellido: ");
-                    String apellido = sc.nextLine();
-                    System.out.print("Puesto: ");
-                    String puesto = sc.nextLine();
-                    System.out.print("Fecha de alta (yyyy-MM-dd): ");
-                    String fechaAlta = sc.nextLine();
-                    System.out.print("Salario: ");
-                    double salario = sc.nextDouble();
-                    System.out.print("Variable: ");
-                    double variable = sc.nextDouble();
-                    System.out.print("Departamento (ID): ");
-                    int dept = sc.nextInt();
-                    sc.nextLine(); // Consumir el salto de línea
-                    GestorBD_SQLite.insertarEmpleado(apellido, puesto, fechaAlta, salario, variable, dept);
-                    break;
+		int opcionSeleccionada; // Almacena la opción elegida por el usuario
 
-                case 3:
-                    GestorBD_SQLite.mostrarDepartamentos();
-                    break;
+		String textoMenu = """
+				==========================
+				    MENÚ PRINCIPAL
+				==========================
+				1. Insertar Departamento.
+				2. Insertar Empleado.
+				3. Mostrar Departamentos.
+				4. Mostrar Empleados.
+				5. Salir.
+				==========================
+				Seleccione una opción:
+				""";
 
-                case 4:
-                    GestorBD_SQLite.mostrarEmpleados();
-                    break;
+		do {
+			System.out.print(textoMenu); // Mostrar el menú al usuario
 
-                case 5:
-                    System.out.println("¡Hasta luego!");
-                    break;
+			// Leer opción seleccionada por usuario:
+			opcionSeleccionada = sc.nextInt();
 
-                default:
-                    System.out.println("Opción no válida.");
-            }
-        } while (opcion != 5);
+			// Limpiar el buffer
+			sc.nextLine();
 
-        sc.close();
-    }
+			switch (opcionSeleccionada) {
+			case 1 -> {
+				System.out.println("===================================");
+				System.out.println("Inserción de un nuevo Departamento:");
+				System.out.println("===================================");
+				gestorDepartamentos.insertarDepartamento(conexion);
+			}
+			case 2 -> {
+				System.out.println("===============================");
+				System.out.println("Inserción de un nuevo Empleado:");
+				gestorEmpleados.insertarEmpleado(conexion);
+				System.out.println("===============================");
+			}
+			case 3 -> {
+				System.out.println("=======================");
+				System.out.println("Lista de Departamentos:");
+				System.out.println("=======================");
+				gestorDepartamentos.mostrarDepartamentos(conexion);
+			}
+			case 4 -> {
+				System.out.println("===================");
+				System.out.println("Lista de Empleados:");
+				System.out.println("===================");
+				gestorEmpleados.mostrarEmpleados(conexion);
+			}
+			case 5 -> {
+				System.out.println("===============================");
+				System.out.println("Gracias por usar la aplicación.");
+				System.out.println("===============================");
+				conexionBDSQLite.cerrarConexion(conexion);
+
+			}
+			default -> {
+				System.out.println("================================================");
+				System.out.println("Opción no válida. Por favor, inténtelo de nuevo.");
+				System.out.println("================================================");
+			}
+			}
+		} while (opcionSeleccionada != 5); // Repetir hasta que el usuario elija salir
+	}
 }

@@ -1,60 +1,64 @@
 package tarea_13;
 
 import java.sql.*;
+import java.util.Scanner;
 
-/**
- * Esta clase gestiona las operaciones relacionadas con la tabla Empleados.
- * Permite insertar nuevos empleados y mostrar los existentes en la base de datos.
- */
 public class GestorEmpleados {
 
-    // Ruta fija de la base de datos
-    private static final String URL_DB = "jdbc:sqlite:tarea_13.db";
+	private static Scanner sc = new Scanner(System.in);
 
-    /**
-     * Método para insertar un nuevo empleado en la base de datos.
-     * 
-     * @param apellido  El apellido del empleado.
-     * @param puesto    El puesto del empleado.
-     * @param fechaAlta La fecha de alta del empleado.
-     * @param salario   El salario del empleado.
-     * @param variable  La parte variable del salario del empleado.
-     * @param dept      El identificador del departamento al que pertenece el empleado.
-     */
-    public static void insertarEmpleado(String apellido, String puesto, String fechaAlta, double salario,
-            double variable, int dept) {
-        String sql = "INSERT INTO Empleados (apellido, puesto, fecha_alta, salario, variable, dept) VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection conn = ConexionBD_SQLite.conectar(URL_DB); 
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, apellido);
-            pstmt.setString(2, puesto);
-            pstmt.setString(3, fechaAlta);
-            pstmt.setDouble(4, salario);
-            pstmt.setDouble(5, variable);
-            pstmt.setInt(6, dept);
-            pstmt.executeUpdate();
-            System.out.println("Empleado insertado con éxito.");
-        } catch (SQLException e) {
-            System.out.println("Error al insertar empleado: " + e.getMessage());
-        }
-    }
+	public void insertarEmpleado(Connection conexion) {
 
-    /**
-     * Método para mostrar todos los empleados existentes en la base de datos.
-     */
-    public static void mostrarEmpleados() {
-        String sql = "SELECT * FROM Empleados";
-        try (Connection conn = ConexionBD_SQLite.conectar(URL_DB); 
-             Statement stmt = conn.createStatement(); 
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                System.out.println("Empleado No: " + rs.getInt("empl_no") + ", Apellido: " + rs.getString("apellido")
-                        + ", Puesto: " + rs.getString("puesto") + ", Fecha Alta: " + rs.getString("fecha_alta")
-                        + ", Salario: " + rs.getDouble("salario") + ", Variable: " + rs.getDouble("variable")
-                        + ", Dept No: " + rs.getInt("dept"));
-            }
-        } catch (SQLException e) {
-            System.out.println("Error al mostrar empleados: " + e.getMessage());
-        }
-    }
+		System.out.print("Apellido: ");
+		String apellido = sc.nextLine();
+		System.out.print("Puesto: ");
+		String puesto = sc.nextLine();
+		System.out.print("Fecha de alta (aaaa-mm-dd): ");
+		String fechaAlta = sc.nextLine();
+		System.out.print("Salario: ");
+		double salario = sc.nextDouble();
+		System.out.print("Variable: ");
+		double variable = sc.nextDouble();
+		System.out.print("Nº Departamento: ");
+		int dept = sc.nextInt();
+		// Limpiar el buffer:
+		sc.nextLine();
+
+		String sql = "INSERT INTO Empleados (apellido, puesto, fecha_alta, salario, variable, dept) VALUES (?, ?, ?, ?, ?, ?)";
+
+		try {
+			
+			PreparedStatement sentencia = conexion.prepareStatement(sql);
+			
+			sentencia.setString(1, apellido);
+			sentencia.setString(2, puesto);
+			sentencia.setString(3, fechaAlta);
+			sentencia.setDouble(4, salario);
+			sentencia.setDouble(5, variable);
+			sentencia.setInt(6, dept);
+			sentencia.executeUpdate();
+			System.out.println("Empleado insertado con éxito.");
+		} catch (SQLException e) {
+			System.out.println("Error al insertar empleado: " + e.getMessage());
+		}
+	}
+
+	public void mostrarEmpleados(Connection conexion) {
+		
+		String sql = "SELECT * FROM Empleados";
+		
+		try {
+			Statement sentencia = conexion.createStatement();
+			ResultSet resultado = sentencia.executeQuery(sql);
+			while (resultado.next()) {
+				System.out.println("Empleado Nº: " + resultado.getInt("empl_no") + ", Apellido: "
+						+ resultado.getString("apellido") + ", Puesto: " + resultado.getString("puesto")
+						+ ", Fecha Alta: " + resultado.getString("fecha_alta") + ", Salario: "
+						+ resultado.getDouble("salario") + ", Variable: " + resultado.getDouble("variable")
+						+ ", Dept No: " + resultado.getInt("dept"));
+			}
+		} catch (SQLException e) {
+			System.out.println("Error al mostrar empleados: " + e.getMessage());
+		}
+	}
 }
